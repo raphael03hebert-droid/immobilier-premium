@@ -1,6 +1,6 @@
 # Geneviève Côté — plateforme immobilière premium
 
-Prototype frontend démontrable basé sur le cahier des charges `Master_Prompt_Codex_Courtiers_Immobiliers.pdf`.
+Prototype frontend démontrable basé sur le cahier des charges `Master_Prompt_Codex_Courtiers_Immobiliers.pdf` et le script maître CRM fourni.
 
 ## Inclus dans cette première phase
 
@@ -11,6 +11,11 @@ Prototype frontend démontrable basé sur le cahier des charges `Master_Prompt_C
 - Ventes & commissions avec KPI, progression d’objectif, graphique et transactions
 - données fictives intégrées pour une démonstration immédiate
 - connexion Microsoft 365 / Outlook prête avec MSAL et Microsoft Graph (`User.Read`, `Mail.ReadWrite`)
+- recherche globale groupée (clients, propriétés et tâches), filtres et tri des collections
+- agenda avec vues mois/semaine/jour/agenda, détection de chevauchements et actions de suivi
+- carte Leaflet réelle avec liste synchronisée, fiches propriétés et filtre par statut/prix
+- report de tâches, détail des commissions (brut, dépenses, net, payé) et export CSV des ventes
+- ajout et aperçu des métadonnées de documents avec avertissement clair sur le stockage local
 
 ## Lancer localement
 
@@ -18,7 +23,7 @@ Ouvrir `index.html` dans un navigateur. Aucun build ni dépendance n’est néce
 
 ## Suite recommandée
 
-La prochaine phase consiste à remplacer les données fictives par Next.js/TypeScript, Prisma/PostgreSQL, authentification multi-tenant, puis à brancher Gmail, Google Calendar et les workflows avec approbation humaine.
+Les données métier actuelles restent locales à chaque navigateur afin de préserver la démonstration. Pour une production multi-utilisateur, la prochaine phase consiste à ajouter un backend (base de données, authentification multi-tenant, stockage documentaire sécurisé, journal d’audit et files de synchronisation), puis les connecteurs MLS, Google Places, Gmail et Google Calendar.
 
 ## Connexion Microsoft 365
 
