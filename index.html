@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MaisonNord — Courtage immobilier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><img class="brand-logo" src="assets/logo-genevieve-cote.jpg" alt="Geneviève Côté - Équipe de courtiers immobiliers"><div><strong>Geneviève Côté</strong><span>Courtiers immobiliers</span></div></div>
+      <div class="workspace-switch"><span class="avatar avatar-gold">ML</span><div><b>Martin Leblanc</b><small>Équipe résidentielle</small></div><span class="chevron">⌄</span></div>
+      <nav class="nav" aria-label="Navigation principale">
+        <p class="nav-label">Espace de travail</p>
+        <button class="nav-item active" data-view="today"><span>◷</span>Aujourd’hui <em>4</em></button>
+        <button class="nav-item" data-view="clients"><span>♙</span>Clients <em>12</em></button>
+        <button class="nav-item" data-view="properties"><span>⌂</span>Propriétés <em>8</em></button>
+        <button class="nav-item" data-view="map"><span>⌖</span>Carte</button>
+        <button class="nav-item" data-view="pipeline"><span>≡</span>Pipeline</button>
+        <button class="nav-item" data-view="visits"><span>◉</span>Visites</button>
+        <button class="nav-item" data-view="calendar"><span>□</span>Agenda</button>
+        <p class="nav-label">Performance</p>
+        <button class="nav-item" data-view="sales"><span>↗</span>Ventes & commissions</button>
+        <button class="nav-item" data-view="history"><span>▤</span>Historique des ventes</button>
+        <button class="nav-item" data-view="team-reports"><span>◒</span>Équipe & rapports</button>
+        <p class="nav-label">Outils</p>
+        <button class="nav-item" data-view="email"><span>✉</span>Courriels <em class="dot"></em></button>
+        <button class="nav-item" data-view="transactions"><span>▣</span>Transactions</button>
+        <button class="nav-item" data-view="tasks"><span>✓</span>Tâches <em>8</em></button>
+        <button class="nav-item" data-view="documents"><span>▤</span>Documents</button>
+        <button class="nav-item" data-view="marketing"><span>✧</span>Marketing</button>
+        <button class="nav-item" data-view="ai"><span>✦</span>Assistant IA</button>
+        <button class="nav-item" data-view="settings"><span>⚙</span>Paramètres</button>
+      </nav>
+      <div class="sidebar-bottom"><div class="help-card"><span class="sparkle">✦</span><b>Besoin d’un coup de main?</b><small>Votre assistant est prêt.</small><button>Ouvrir l’assistant →</button></div><div class="profile-row"><span class="avatar avatar-blue">ML</span><div><b>Martin Leblanc</b><small>Administrateur</small></div><span class="more">•••</span></div></div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar"><button class="mobile-menu" aria-label="Ouvrir le menu">☰</button><div class="mobile-brand"><img class="brand-logo" src="assets/logo-genevieve-cote.jpg" alt="Logo Geneviève Côté"><strong>Geneviève Côté</strong></div><div class="top-search"><span>⌕</span><input id="global-search" placeholder="Rechercher partout..." /><kbd>⌘ K</kbd></div><div class="top-actions"><button class="icon-btn" aria-label="Aide">?</button><button class="icon-btn notification" aria-label="Notifications">♧<i></i></button><div class="top-avatar">GC</div></div></header>
+      <div id="app-view"></div>
+    </main>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
+  <script src="m365.js"></script>
+  <script src="app-v2.js?v=3"></script>
+</body>
+</html>
