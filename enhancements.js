@@ -279,6 +279,9 @@
   }
 
   function transactionFields() {
+    document.querySelectorAll('form[data-kind="transaction"] select[name="status"] option').forEach(option => {
+      if (option.textContent.trim() === 'Ferme') option.textContent = 'Fermé';
+    });
     const form = document.querySelector('form[data-kind="transaction"]');
     if (!form || form.querySelector('[data-gc-transaction-extra]')) return;
     const actions = form.querySelector('.modal-actions');
