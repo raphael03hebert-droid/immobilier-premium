@@ -5,9 +5,40 @@
   if (!app) return;
 
   const clone = value => JSON.parse(JSON.stringify(value));
+  const defaults = {
+    clients: [
+      {id:1,name:'Sophie Tremblay',type:'Acheteuse',stage:'Acheteur actif',email:'sophie@example.com',phone:'514 555-0182',address:'1845, rue Beaubien E., Montréal, QC',budget:'750 000 $'},
+      {id:2,name:'Marc-André Roy',type:'Acheteur',stage:'Qualifié chaud',email:'marc@example.com',phone:'514 555-0134',address:'650, avenue du Mont-Royal E., Montréal, QC',budget:'600 000 $'},
+      {id:3,name:'Claudine Bouchard',type:'Vendeuse',stage:'Vendeur actif',email:'claudine@example.com',phone:'514 555-0198',address:'420, chemin du Bord-du-Lac, Beaconsfield, QC',budget:'1 250 000 $'}
+    ],
+    properties: [
+      {id:1,address:'1845, rue Beaubien E.',price:'729 000 $',status:'À vendre',area:'Rosemont–La Petite-Patrie',clientId:3},
+      {id:2,address:'88, avenue du Mont-Royal',price:'589 000 $',status:'Sous offre',area:'Le Plateau',clientId:2},
+      {id:3,address:'420, chemin du Bord-du-Lac',price:'1 249 000 $',status:'À vendre',area:'Beaconsfield',clientId:3}
+    ],
+    visits: [
+      {id:1,clientId:1,propertyId:1,date:'2026-09-04',time:'11:30',endTime:'12:30',status:'À confirmer'},
+      {id:2,clientId:2,propertyId:2,date:'2026-09-05',time:'14:00',endTime:'15:00',status:'Confirmée'}
+    ],
+    tasks: [
+      {id:1,title:'Relancer Marc-André Roy',description:'Lead chaud sans réponse depuis 18 h.',date:'2026-09-01',time:'09:00',priority:'Urgent',status:'À faire',clientId:2},
+      {id:2,title:'Préparer le suivi vendeur',description:'3 visites sans offre au Plateau.',date:'2026-09-02',time:'10:00',priority:'Haute',status:'À faire',clientId:3}
+    ],
+    transactions: [
+      {id:1,clientId:2,propertyId:2,status:'Sous offre',price:'589 000 $',commission:'14 725 $',date:'2026-08-28'},
+      {id:2,clientId:3,propertyId:3,status:'Vendu',price:'1 180 000 $',commission:'29 500 $',date:'2026-07-12'}
+    ],
+    documents: [
+      {id:1,clientId:3,name:'Mandat de vente.pdf',category:'Contrats',size:'1,2 Mo'},
+      {id:2,clientId:3,name:'Certificat localisation.pdf',category:'Juridique',size:'840 Ko'},
+      {id:3,clientId:1,name:'Pré-approbation.pdf',category:'Financement',size:'420 Ko'}
+    ]
+  };
   const read = key => {
-    try { return JSON.parse(localStorage.getItem(`gc-${key}`) || 'null') || []; }
-    catch { return []; }
+    try {
+      const stored = localStorage.getItem(`gc-${key}`);
+      return stored === null ? clone(defaults[key] || []) : (JSON.parse(stored) || []);
+    } catch { return clone(defaults[key] || []); }
   };
   const write = (key, value) => localStorage.setItem(`gc-${key}`, JSON.stringify(value));
   const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({
