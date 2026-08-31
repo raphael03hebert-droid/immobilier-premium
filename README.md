@@ -1,4 +1,4 @@
-# MaisonNord — plateforme immobilière premium
+# Geneviève Côté — plateforme immobilière premium
 
 Prototype frontend démontrable basé sur le cahier des charges `Master_Prompt_Codex_Courtiers_Immobiliers.pdf`.
 
