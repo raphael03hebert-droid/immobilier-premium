@@ -38,3 +38,46 @@
 
 /* Chrome CRM persistant : la navigation reste disponible pendant le défilement. */
 @media(min-width:761px){.sidebar{position:sticky;top:0;height:100vh;max-height:100vh;overflow-y:auto}.topbar{position:sticky;top:0;z-index:20}}
+
+/* Finition premium : rythme, profondeur et interactions plus fluides. */
+:root{--canvas:#eef3f2;--line:#dfe8e5;--muted:#74858a;--navy:#0c3041;--teal:#347b80;--shadow:0 14px 34px rgba(14,48,61,.07)}
+html{scroll-behavior:smooth}
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.app-shell{background:var(--canvas)}
+.sidebar{width:268px;box-shadow:10px 0 28px rgba(10,40,52,.08)}
+.brand{padding-bottom:22px}
+.brand-logo{width:40px;height:40px;object-fit:cover;border-radius:12px;box-shadow:0 5px 14px rgba(0,0,0,.16)}
+.workspace-switch{transition:background .2s ease,border-color .2s ease,transform .2s ease}
+.workspace-switch:hover{background:#17465a;border-color:#6b8e95;transform:translateY(-1px)}
+.nav-item{transition:background .2s ease,color .2s ease,transform .2s ease}
+.nav-item:hover{transform:translateX(2px)}
+.nav-item.active{box-shadow:inset 3px 0 0 #e6c984,0 6px 16px rgba(0,0,0,.08)}
+.topbar{height:76px;padding:0 40px;box-shadow:0 1px 0 rgba(17,48,58,.12);backdrop-filter:blur(12px)}
+.top-search{height:40px;border-radius:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05);transition:border-color .2s ease,box-shadow .2s ease,background .2s ease}
+.top-search:focus-within{border-color:#7ca6a8;box-shadow:0 0 0 4px rgba(124,166,168,.15)}
+.icon-btn{transition:transform .2s ease,color .2s ease}
+.icon-btn:hover{transform:translateY(-1px);color:#efd49a!important}
+.main-content{background:radial-gradient(circle at 80% 0%,rgba(202,222,218,.28),transparent 34%),var(--canvas)}
+.page{padding:38px 44px 62px}
+.page-header{margin-bottom:26px}
+.page-title{font-size:32px;line-height:1.08}
+.subtitle{font-size:12px;letter-spacing:.01em}
+.btn{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease,background .2s ease}
+.btn:hover{transform:translateY(-2px);box-shadow:0 7px 16px rgba(19,55,65,.12)}
+.btn:active{transform:translateY(0);box-shadow:none}
+.btn-primary{box-shadow:0 7px 16px rgba(12,48,65,.16)}
+.card,.kpi,.property-card,.gc-analytics-card-v2,.gc-analytics-kpi-v2{box-shadow:var(--shadow);transition:box-shadow .22s ease,transform .22s ease,border-color .22s ease}
+.card:hover,.kpi:hover,.property-card:hover,.gc-analytics-card-v2:hover,.gc-analytics-kpi-v2:hover{border-color:#c8d9d5;box-shadow:0 18px 42px rgba(14,48,61,.11);transform:translateY(-2px)}
+.card-title,.gc-analytics-card-head h3{letter-spacing:-.01em}
+.data-table tbody tr{transition:background .18s ease}
+.data-table tbody tr:hover{background:#f4f8f6}
+.data-table td{transition:color .18s ease}
+.gc-analytics-topline-v2{border:1px solid rgba(166,207,205,.18);box-shadow:0 16px 34px rgba(10,48,62,.15)}
+.gc-analytics-filters-v2{border-color:#dbe6e3;box-shadow:0 9px 24px rgba(14,48,61,.06)}
+.gc-analytics-filters-v2 select,.gc-analytics-filters-v2 input,.select{transition:border-color .2s ease,box-shadow .2s ease}
+.gc-analytics-filters-v2 select:focus,.gc-analytics-filters-v2 input:focus,.select:focus{border-color:#6fa0a0;box-shadow:0 0 0 3px rgba(52,123,128,.12);outline:0}
+.gc-analytics-feedback-v2,.outlook-feedback{animation:gc-fade-in .25s ease both}
+@keyframes gc-fade-in{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:1050px){.sidebar{width:238px}.topbar{padding:0 24px}.page{padding-left:28px;padding-right:28px}}
+@media(max-width:760px){.brand-logo{width:34px;height:34px;border-radius:10px}.topbar{height:64px;padding:0 14px}.page{padding:24px 15px 42px}.page-title{font-size:28px}.card:hover,.kpi:hover,.property-card:hover,.gc-analytics-card-v2:hover,.gc-analytics-kpi-v2:hover{transform:none;box-shadow:var(--shadow)}.nav-item:hover{transform:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
