@@ -16,6 +16,20 @@ function cleanMessages(value) {
     .filter(item => item.content);
 }
 
+function cleanContext(value) {
+  if (!value || typeof value !== 'object') return '';
+  try {
+    return JSON.stringify({
+      source: String(value.source || 'CRM').slice(0, 120),
+      clients: Array.isArray(value.clients) ? value.clients.slice(0, 40) : [],
+      properties: Array.isArray(value.properties) ? value.properties.slice(0, 40) : [],
+      transactions: Array.isArray(value.transactions) ? value.transactions.slice(0, 40) : [],
+      visits: Array.isArray(value.visits) ? value.visits.slice(0, 40) : [],
+      tasks: Array.isArray(value.tasks) ? value.tasks.slice(0, 40) : []
+    }).slice(0, 18000);
+  } catch { return ''; }
+}
+
 function clientKey(req) {
   return String(req.headers?.['x-forwarded-for'] || req.headers?.['x-real-ip'] || 'anonymous').split(',')[0].trim();
 }
@@ -30,7 +44,7 @@ function outputText(response) {
     .trim();
 }
 
-const assistantInstructions = 'Tu es l’assistant professionnel de Geneviève Côté, courtière immobilière au Québec. Réponds en français, avec un ton clair, chaleureux et précis. Aide à organiser les suivis, préparer des courriels, résumer des dossiers et structurer des actions immobilières. Ne prétends jamais avoir consulté une donnée du CRM ou envoyé un courriel si elle ne t’a pas été fournie. Pour toute décision juridique, financière ou réglementaire, recommande une vérification professionnelle. Réponds directement et propose une prochaine action concrète quand c’est pertinent.';
+const assistantInstructions = 'Tu es l’assistant professionnel de Geneviève Côté, courtière immobilière au Québec. Réponds en français, avec un ton clair, chaleureux et précis. Aide à organiser les suivis, préparer des courriels, résumer des dossiers et structurer des actions immobilières. Lorsque le contexte CRM est fourni, utilise uniquement ces données internes et cite les noms, dates, montants, étapes ou identifiants qui justifient ta réponse. Si une donnée manque, dis-le explicitement. Ne prétends jamais avoir envoyé un courriel ou modifié un dossier. Pour toute décision juridique, financière ou réglementaire, recommande une vérification professionnelle. Réponds directement et propose une prochaine action concrète quand c’est pertinent.';
 
 function geminiText(response) {
   return (response?.candidates?.[0]?.content?.parts || [])
@@ -55,6 +69,7 @@ module.exports = async function aiChat(req, res) {
   recent.push(now); rateWindow.set(key, recent);
 
   const messages = cleanMessages(bodyOf(req).messages);
+  const context = cleanContext(bodyOf(req).context);
   if (!messages.length || messages[messages.length - 1].role !== 'user') return res.status(400).json({ ok: false, error: 'Ajoutez un message utilisateur.' });
 
   const transcript = messages.map(item => `${item.role === 'user' ? 'Utilisateur' : 'Assistant'} : ${item.content}`).join('\n\n');
@@ -65,7 +80,7 @@ module.exports = async function aiChat(req, res) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: assistantInstructions }] },
+          systemInstruction: { parts: [{ text: `${assistantInstructions}${context ? `\n\nContexte CRM interne à citer, sans l’inventer ni le compléter :\n${context}` : ''}` }] },
           contents: messages.map(item => ({ role: item.role === 'assistant' ? 'model' : 'user', parts: [{ text: item.content }] })),
           generationConfig: { maxOutputTokens: 900, temperature: 0.7 }
         })
@@ -86,7 +101,7 @@ module.exports = async function aiChat(req, res) {
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || 'gpt-5.4',
         store: false,
-        instructions: assistantInstructions,
+        instructions: `${assistantInstructions}${context ? `\n\nContexte CRM interne à citer, sans l’inventer ni le compléter :\n${context}` : ''}`,
         input: `Conversation à poursuivre :\n\n${transcript}`,
         text: { verbosity: 'medium' },
         max_output_tokens: 900
