@@ -11,6 +11,7 @@ Prototype frontend démontrable basé sur le cahier des charges `Master_Prompt_C
 - Ventes & commissions avec KPI, progression d’objectif, graphique et transactions
 - données fictives intégrées pour une démonstration immédiate
 - connexion Microsoft 365 / Outlook prête avec MSAL et Microsoft Graph (`User.Read`, `Mail.ReadWrite`)
+- assistant IA conversationnel relié à l’API OpenAI via `/api/ai-chat` et clé serveur privée
 - recherche globale groupée (clients, propriétés et tâches), filtres et tri des collections
 - agenda avec vues mois/semaine/jour/agenda, détection de chevauchements et actions de suivi
 - carte Leaflet réelle avec liste synchronisée, fiches propriétés et filtre par statut/prix
@@ -28,3 +29,7 @@ Les données métier actuelles restent locales à chaque navigateur afin de pré
 ## Connexion Microsoft 365
 
 Le bouton Microsoft 365 est présent dans **Courriels** et **Paramètres**. Pour activer le vrai OAuth, ajoutez l’URL HTTPS de production (et localhost en développement) comme URI de redirection dans l’application Microsoft Entra ID associée au client `eeff2f4a-7f6b-44fb-a33e-8d9990ce16e1`. Le navigateur ne peut pas faire un OAuth réel depuis une URL `file://`.
+
+## Assistant IA
+
+L’assistant utilise l’API Responses d’OpenAI côté serveur. La variable `OPENAI_API_KEY` doit rester dans l’environnement Vercel et ne doit jamais être ajoutée à GitHub ou au JavaScript du navigateur. `OPENAI_MODEL` est facultative et vaut `gpt-5.4` par défaut.
