@@ -62,7 +62,7 @@
   const readJson = (key, fallback = []) => { try { const raw = localStorage.getItem(`gc-${key}`); return raw === null ? clone(fallback) : (JSON.parse(raw) || []); } catch { return clone(fallback); } };
   const mode = () => localStorage.getItem('gc-analytics-mode') || (CRM_KEYS.some(key => localStorage.getItem(`gc-${key}`) !== null) ? 'real' : 'demo');
   const read = key => mode() === 'demo' ? clone(demo[key] || []) : readJson(key, []);
-  const dataSet = () => ({clients:read('clients'),properties:read('properties'),visits:read('visits'),transactions:read('transactions'),tasks:read('tasks'),activities:read('activities'),objectives:localStorage.getItem('gc-objectives') ? readJson('objectives', {}) : clone(demo.objectives),campaigns:read('campaigns'),reports:read('reports'),demo:mode() === 'demo'});
+  const dataSet = () => { const result={clients:read('clients'),properties:read('properties'),visits:read('visits'),transactions:read('transactions'),tasks:read('tasks'),activities:read('activities'),objectives:localStorage.getItem('gc-objectives') ? readJson('objectives', {}) : clone(demo.objectives),campaigns:read('campaigns'),reports:read('reports'),demo:mode() === 'demo'}; result.events=deriveEvents(result); if(!result.demo&&!localStorage.getItem('gc-crm-events')&&result.events.length) { try { localStorage.setItem('gc-crm-events',JSON.stringify(result.events)); } catch {} } return result; };
   const state = Object.assign({period:'30',broker:'',clientType:'',stage:'',source:'',propertyType:'',area:'',txStatus:'',commissionStatus:'',customFrom:'',customTo:''}, (() => { try { return JSON.parse(localStorage.getItem('gc-analytics-filters') || '{}'); } catch { return {}; } })());
   const stages = ['Nouveau lead','Qualifié chaud','Rendez-vous','Acheteur actif','Vendeur actif','Offre','Sous offre','Transaction','Ancien client'];
   const probabilities = {'Nouveau lead':.10,'Qualifié chaud':.25,'Rendez-vous':.40,'Acheteur actif':.55,'Vendeur actif':.55,'Offre':.70,'Sous offre':.80,'Transaction':.90,'Vendu':1};
@@ -100,7 +100,7 @@
     const visits = data.visits.filter(item => propertyIds.has(String(item.propertyId)) && inRange(item.date, r));
     const tasks = data.tasks.filter(item => clientIds.has(String(item.clientId)) && inRange(item.date, r));
     const activities = data.activities.filter(item => (!item.clientId || clientIds.has(String(item.clientId))) && inRange(item.at || item.date, r));
-    return {clients,properties,transactions,visits,tasks,activities,objectives:data.objectives,reports:data.reports,range:r};
+    return {clients,properties,transactions,visits,tasks,activities,events:data.events,objectives:data.objectives,reports:data.reports,range:r};
   }
 
   function previousFiltered(data) {
@@ -191,6 +191,10 @@
     const rows=[['0–7 jours',0],['8–14 jours',0],['15–30 jours',0],['31–60 jours',0],['60+ jours',0]]; data.clients.filter(item=>item.stage && item.stage!=='Ancien client').forEach(item=>{const days=daysBetween(item.stageEnteredAt,todayIso) ?? 0; const index=days<=7?0:days<=14?1:days<=30?2:days<=60?3:4; rows[index][1]++;}); const max=Math.max(1,...rows.map(row=>row[1]));
     return card('Aging du pipeline','Dossiers par ancienneté dans l’étape actuelle',`<div class="gc-simple-bars-v2">${rows.map(row=>`<button type="button" data-analytics-drill data-view="pipeline"><span>${row[0]}</span><i><em style="width:${Math.max(5,(row[1]/max)*100)}%"></em></i><b>${row[1]}</b></button>`).join('')}</div>`);
   }
+  function eventJournal(data) {
+    const events=(data.events||[]).filter(item=>inRange(item.event_at, data.range || range())).sort((a,b)=>String(b.event_at).localeCompare(String(a.event_at))).slice(0,7);
+    return card('Journal CRM','Événements append-only utilisés par les indicateurs',events.length?`<div class="gc-event-journal-v2">${events.map(item=>`<button type="button" data-analytics-drill data-view="${item.contact_id?'clients':item.transaction_id?'transactions':'today'}" data-query="${esc(clientById(data,item.contact_id)?.name||'')}"><time>${esc(dateLabel(item.event_at))}</time><span><strong>${esc(eventLabels[item.event_type]||item.event_type)}</strong><small>${esc(clientById(data,item.contact_id)?.name || propertyById(data,item.property_id)?.address || 'Événement CRM')}</small></span><b>→</b></button>`).join('')}</div>`:empty('Aucun événement pour cette période.'));
+  }
   function objectives(data) {
     const sold=data.transactions.filter(item=>item.status==='Vendu'); const actual={volume:sold.reduce((sum,item)=>sum+money(item.price),0),sales:sold.length,commission:sold.reduce((sum,item)=>sum+money(item.commissionGross||item.commission),0),appointments:data.visits.length,leads:data.clients.filter(item=>inRange(item.createdAt,range())).length,listings:data.properties.filter(activeProperty).length}; const labels={volume:'Volume vendu',sales:'Ventes',commission:'Commissions',appointments:'Rendez-vous',leads:'Nouveaux leads',listings:'Inscriptions actives'};
     return card('Objectifs vs réalisés','Objectifs configurables · rythme et projection restent indicatifs',`<div class="gc-objectives-v2">${Object.entries(labels).map(([key,label])=>{const goal=Number(data.objectives?.[key])||0;const value=actual[key];const pct=goal?Math.min(100,(value/goal)*100):0;return `<div><span>${label}</span><b>${key==='volume'||key==='commission'?formatMoney(value):value.toLocaleString('fr-CA')} / ${key==='volume'||key==='commission'?formatMoney(goal):goal}</b><i><em style="width:${pct}%"></em></i><small>${goal?formatPercent(percentage(value,goal)):'Objectif non configuré'} · projection indicative</small></div>`;}).join('')}</div><button type="button" class="btn" data-analytics="edit-objectives">Configurer les objectifs</button>`);
@@ -239,6 +243,7 @@
     if (page==='today') { const header=app.querySelector('.page-header'); if(header&&!app.querySelector('.gc-analytics-suite-v2')) header.insertAdjacentHTML('afterend',dashboardHtml(data)); }
     else if(page&& !app.querySelector(`.gc-page-insight-v2[data-insight="${page==='team-reports'?'team':page}"]`)) { app.insertAdjacentHTML('beforeend',supplemental(page,data)); }
   }
+  function mountEventJournal() { if(!pageIs('aujourd')) return; const grid=app.querySelector('.gc-analytics-grid-v2'); if(grid&&!grid.querySelector('.gc-event-journal-v2')) grid.insertAdjacentHTML('beforeend',eventJournal(filtered(dataSet()))); }
 
   document.addEventListener('change', event => { const control=event.target.closest('[data-analytics-filter]'); if(!control) return; state[control.dataset.analyticsFilter]=control.value; try { localStorage.setItem('gc-analytics-filters',JSON.stringify(state)); } catch {} app.querySelectorAll('.gc-analytics-suite-v2,.gc-page-insight-v2').forEach(node=>node.remove()); mount(); });
   document.addEventListener('click', event => {
@@ -247,5 +252,5 @@
     const drill=event.target.closest('[data-analytics-drill]'); if(drill){const view=drill.dataset.view;if(view)document.querySelector(`.nav-item[data-view="${view}"]`)?.click();const query=drill.dataset.query;if(query)setTimeout(()=>{const input=document.querySelector('#client-filter,#property-filter');if(input){input.value=query;input.dispatchEvent(new Event('input',{bubbles:true}));}},180);}
   });
   document.addEventListener('submit', event => { if(!event.target.matches('[data-objectives-form]')) return; event.preventDefault(); const values=Object.fromEntries(new FormData(event.target).entries()); localStorage.setItem('gc-objectives',JSON.stringify(Object.fromEntries(Object.entries(values).map(([key,value])=>[key,Number(value)||0])))); event.target.closest('[data-analytics-modal]')?.remove();app.querySelectorAll('.gc-analytics-suite-v2,.gc-page-insight-v2').forEach(node=>node.remove());mount();feedback('Objectifs enregistrés.'); });
-  const observer=new MutationObserver(()=>requestAnimationFrame(mount)); observer.observe(app,{childList:true,subtree:true}); setInterval(mount,1200); mount();
+  const observer=new MutationObserver(()=>requestAnimationFrame(() => { mount(); mountEventJournal(); })); observer.observe(app,{childList:true,subtree:true}); setInterval(() => { mount(); mountEventJournal(); },1200); mount(); mountEventJournal();
 })();
