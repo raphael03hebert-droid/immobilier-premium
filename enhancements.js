@@ -311,6 +311,24 @@
     });
   }
 
+  function editableModules() {
+    if (is('ventes')) {
+      const sold = read('transactions').filter(item => item.status === 'Vendu');
+      const header = app.querySelector('.data-table thead tr');
+      if (header && !header.querySelector('[data-edit-column]')) header.insertAdjacentHTML('beforeend', '<th data-edit-column>Actions</th>');
+      app.querySelectorAll('.data-table tbody tr').forEach((row, index) => {
+        const item = sold[index];
+        if (item && !row.querySelector('[data-action="edit-transaction"]')) row.insertAdjacentHTML('beforeend', `<td><button type="button" class="action-link" data-action="edit-transaction" data-id="${esc(item.id)}">Modifier</button></td>`);
+      });
+    }
+    if (is('documents')) {
+      app.querySelectorAll('[data-action="preview-document"]').forEach(button => {
+        const id = button.dataset.docId;
+        if (id && !button.parentElement?.querySelector('[data-action="edit-document"]')) button.insertAdjacentHTML('afterend', ` <button type="button" class="action-link" data-action="edit-document" data-id="${esc(id)}">Modifier</button>`);
+      });
+    }
+  }
+
   function enhance() {
     enhanceBrand();
     globalSearch();
@@ -324,6 +342,7 @@
     transactionFields();
     commissionSummary();
     documents();
+    editableModules();
     completePendingSearch();
   }
 
@@ -355,6 +374,7 @@
     }
     if (action === 'upload-document') openDocumentModal();
     if (action === 'preview-document') openDocumentPreview(event.target.closest('[data-doc-id]')?.dataset.docId);
+    if (action === 'edit-document') openDocumentEditModal(event.target.closest('[data-action="edit-document"]')?.dataset.id);
   });
 
   document.addEventListener('submit', event => {
@@ -382,6 +402,21 @@
     }
   });
 
+  document.addEventListener('submit', event => {
+    const form = event.target;
+    if (!form.matches('.gc-document-edit-form')) return;
+    event.preventDefault();
+    const values = Object.fromEntries(new FormData(form).entries());
+    const docs = read('documents');
+    const doc = docs.find(item => String(item.id) === String(values.id));
+    if (!doc) return feedback('Document introuvable.', 'error');
+    Object.assign(doc, {name: values.name, category: values.category, clientId: Number(values.clientId) || null, size: values.size || 'Métadonnées locales'});
+    write('documents', docs);
+    form.closest('.gc-modal-backdrop')?.remove();
+    clickNav('documents');
+    setTimeout(() => feedback('Document modifié avec succès.'), 0);
+  });
+
   function openDocumentModal() {
     if (document.querySelector('.gc-modal-backdrop')) return;
     const clients = read('clients');
@@ -396,6 +431,17 @@
     if (!doc) return feedback('Document introuvable.', 'error');
     const node = document.createElement('div'); node.className = 'gc-modal-backdrop';
     node.innerHTML = `<div class="gc-modal"><div class="modal-head"><h2>${esc(doc.name)}</h2><button type="button" class="modal-close" data-gc-close>×</button></div><div class="gc-document-preview"><span class="document-icon">▤</span><strong>${esc(doc.category)}</strong><span>${esc(doc.size || 'Taille inconnue')}</span><p>Cette fiche confirme le document associé. L’aperçu du fichier et le coffre chiffré nécessitent le stockage sécurisé du backend.</p></div><div class="modal-actions"><button type="button" class="btn btn-primary" data-gc-close>Fermer</button></div></div>`;
+    document.body.append(node);
+    node.addEventListener('click', event => { if (event.target === node || event.target.closest('[data-gc-close]')) node.remove(); });
+  }
+
+  function openDocumentEditModal(id) {
+    const docs = read('documents');
+    const doc = docs.find(item => String(item.id) === String(id));
+    if (!doc || document.querySelector('.gc-modal-backdrop')) return;
+    const clients = read('clients');
+    const node = document.createElement('div'); node.className = 'gc-modal-backdrop';
+    node.innerHTML = `<form class="gc-document-edit-form gc-modal"><div class="modal-head"><h2>Modifier le document</h2><button type="button" class="modal-close" data-gc-close>×</button></div><input type="hidden" name="id" value="${esc(doc.id)}"><div class="form-grid"><div class="form-field full"><label>Nom du document</label><input name="name" required value="${esc(doc.name)}"></div><div class="form-field"><label>Catégorie</label><select name="category">${['Contrats','Financement','Juridique','Photos','Autre'].map(value => `<option ${doc.category === value ? 'selected' : ''}>${value}</option>`).join('')}</select></div><div class="form-field"><label>Taille</label><input name="size" value="${esc(doc.size || '')}" placeholder="1,2 Mo"></div><div class="form-field full"><label>Client associé</label><select name="clientId"><option value="">Aucun</option>${clients.map(client => `<option value="${client.id}" ${String(doc.clientId) === String(client.id) ? 'selected' : ''}>${esc(client.name)}</option>`).join('')}</select></div></div><div class="modal-actions"><button type="button" class="btn" data-gc-close>Annuler</button><button class="btn btn-primary" type="submit">Enregistrer</button></div></form>`;
     document.body.append(node);
     node.addEventListener('click', event => { if (event.target === node || event.target.closest('[data-gc-close]')) node.remove(); });
   }
