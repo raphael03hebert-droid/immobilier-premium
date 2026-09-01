@@ -100,7 +100,7 @@
     const visits = data.visits.filter(item => propertyIds.has(String(item.propertyId)) && inRange(item.date, r));
     const tasks = data.tasks.filter(item => clientIds.has(String(item.clientId)) && inRange(item.date, r));
     const activities = data.activities.filter(item => (!item.clientId || clientIds.has(String(item.clientId))) && inRange(item.at || item.date, r));
-    return {clients,properties,transactions,visits,tasks,activities,range:r};
+    return {clients,properties,transactions,visits,tasks,activities,objectives:data.objectives,reports:data.reports,range:r};
   }
 
   function previousFiltered(data) {
