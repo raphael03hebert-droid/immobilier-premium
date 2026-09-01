@@ -243,7 +243,7 @@
     if (page==='today') { const header=app.querySelector('.page-header'); if(header&&!app.querySelector('.gc-analytics-suite-v2')) header.insertAdjacentHTML('afterend',dashboardHtml(data)); }
     else if(page&& !app.querySelector(`.gc-page-insight-v2[data-insight="${page==='team-reports'?'team':page}"]`)) { app.insertAdjacentHTML('beforeend',supplemental(page,data)); }
   }
-  function mountEventJournal() { if(!pageIs('aujourd')) return; const grid=app.querySelector('.gc-analytics-grid-v2'); if(grid&&!grid.querySelector('.gc-event-journal-v2')) grid.insertAdjacentHTML('beforeend',eventJournal(filtered(dataSet()))); }
+  function mountEventJournal() { if(!pageIs('aujourd')) return; const grid=app.querySelector('.gc-analytics-grid-v2'); if(grid&&![...grid.children].some(child=>child.textContent.includes('Journal CRM'))) grid.insertAdjacentHTML('beforeend',eventJournal(filtered(dataSet()))); }
 
   document.addEventListener('change', event => { const control=event.target.closest('[data-analytics-filter]'); if(!control) return; state[control.dataset.analyticsFilter]=control.value; try { localStorage.setItem('gc-analytics-filters',JSON.stringify(state)); } catch {} app.querySelectorAll('.gc-analytics-suite-v2,.gc-page-insight-v2').forEach(node=>node.remove()); mount(); });
   document.addEventListener('click', event => {
